@@ -112,7 +112,7 @@ PSU      : 1000W
 ### Option 1 : Installation Automatique (Recommandée)
 
 ```bash
-# Sur Ubuntu 24.04 fraîchement installé
+# Sur Ubuntu 25.10 fraîchement installé
 curl -fsSL https://raw.githubusercontent.com/jacquesbagui/roxane-os/main/quick-install.sh | sudo bash
 ```
 
@@ -440,7 +440,7 @@ Roxane OS n'existerait pas sans ces projets incroyables :
 <table>
   <tr>
     <td align="center">
-      <img src="https://avatars.githubusercontent.com/u/5459999?s=48&v=4" width="100px;" alt=""/>
+      <img src="https://avatars.githubusercontent.com/u/5459999?v=4" width="100px;" alt=""/>
       <br /><sub><b>Jacques BAGUI</b></sub>
       <br />Creator & Lead Dev
     </td>
@@ -453,13 +453,13 @@ Roxane OS n'existerait pas sans ces projets incroyables :
 
 <div align="center">
 
-![GitHub stars](https://img.shields.io/github/stars/your-username/roxane-os?style=social)
-![GitHub forks](https://img.shields.io/github/forks/your-username/roxane-os?style=social)
+![GitHub stars](https://img.shields.io/github/stars/jacquesbagui/roxane-os?style=social)
+![GitHub forks](https://img.shields.io/github/forks/jacquesbagui/roxane-os?style=social)
 ![GitHub watchers](https://img.shields.io/github/watchers/your-username/roxane-os?style=social)
 
-![GitHub issues](https://img.shields.io/github/issues/your-username/roxane-os)
-![GitHub pull requests](https://img.shields.io/github/issues-pr/your-username/roxane-os)
-![GitHub last commit](https://img.shields.io/github/last-commit/your-username/roxane-os)
+![GitHub issues](https://img.shields.io/github/issues/jacquesbagui/roxane-os)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/jacquesbagui/roxane-os)
+![GitHub last commit](https://img.shields.io/github/last-commit/jacquesbagui/roxane-os)
 
 </div>
 
