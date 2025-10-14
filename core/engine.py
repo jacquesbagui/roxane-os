@@ -82,6 +82,78 @@ class RoxaneEngine:
         
         logger.success("✅ Roxane Engine initialized")
     
+    async def initialize(self) -> bool:
+        """
+        Initialise tous les composants du moteur
+        
+        Returns:
+            True si l'initialisation réussit
+        """
+        try:
+            logger.info("🔧 Initializing Roxane Engine components...")
+            
+            # Initialiser la base de données
+            db_success = await self.db_manager.initialize()
+            if not db_success:
+                logger.error("❌ Database initialization failed")
+                return False
+            
+            # Initialiser Redis
+            redis_success = await self.redis_manager.initialize()
+            if not redis_success:
+                logger.warning("⚠️ Redis initialization failed, continuing without cache")
+            
+            # Initialiser les modules
+            for name, module in self.modules.items():
+                if hasattr(module, 'initialize'):
+                    module_success = await module.initialize()
+                    if not module_success:
+                        logger.warning(f"⚠️ Module {name} initialization failed")
+            
+            # Initialiser la mémoire
+            if hasattr(self.memory, 'initialize'):
+                memory_success = await self.memory.initialize()
+                if not memory_success:
+                    logger.warning("⚠️ Memory initialization failed")
+            
+            logger.success("✅ All components initialized successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"❌ Engine initialization failed: {e}")
+            return False
+    
+    async def cleanup(self) -> None:
+        """Nettoie toutes les ressources du moteur"""
+        try:
+            logger.info("🧹 Cleaning up Roxane Engine...")
+            
+            # Nettoyer les modules
+            for name, module in self.modules.items():
+                if hasattr(module, 'cleanup'):
+                    await module.cleanup()
+            
+            # Nettoyer la mémoire
+            if hasattr(self.memory, 'cleanup'):
+                await self.memory.cleanup()
+            
+            # Nettoyer le gestionnaire de contexte
+            if hasattr(self.context_manager, 'cleanup'):
+                await self.context_manager.cleanup()
+            
+            # Nettoyer Redis
+            if hasattr(self.redis_manager, 'cleanup'):
+                await self.redis_manager.cleanup()
+            
+            # Nettoyer la base de données
+            if hasattr(self.db_manager, 'cleanup'):
+                await self.db_manager.cleanup()
+            
+            logger.success("✅ Roxane Engine cleaned up successfully")
+            
+        except Exception as e:
+            logger.warning(f"⚠️ Error during cleanup: {e}")
+    
     def _load_default_config(self) -> Dict:
         """Charge la configuration par défaut"""
         return {

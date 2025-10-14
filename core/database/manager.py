@@ -4,6 +4,7 @@ Gestionnaire de base de données PostgreSQL
 """
 
 import asyncio
+from datetime import datetime
 from typing import Dict, Optional, List, Any
 from contextlib import asynccontextmanager
 from loguru import logger
@@ -317,6 +318,24 @@ class DatabaseManager:
         
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(None, search_sync)
+    
+    async def update_conversation_message_count(self, conversation_id: str) -> None:
+        """Met à jour le compteur de messages d'une conversation"""
+        def update_sync():
+            session = self.SessionLocal()
+            try:
+                conversation = session.query(Conversation).filter(Conversation.id == conversation_id).first()
+                if conversation:
+                    # Compter les messages actuels
+                    message_count = session.query(Message).filter(Message.conversation_id == conversation_id).count()
+                    conversation.message_count = message_count
+                    conversation.updated_at = datetime.utcnow()
+                    session.commit()
+            finally:
+                session.close()
+        
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, update_sync)
     
     async def get_stats(self) -> Dict[str, Any]:
         """Retourne les statistiques de la base de données"""

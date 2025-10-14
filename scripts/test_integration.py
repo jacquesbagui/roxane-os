@@ -61,7 +61,7 @@ async def test_integration():
         logger.info("📝 Test 2: Contrôle système...")
         start_time = time.time()
         
-        system_result = await engine.modules['system_control'].execute('get_system_info', {})
+        system_result = await engine.modules['system_control'].execute('info', {})
         
         system_time = time.time() - start_time
         
@@ -75,7 +75,7 @@ async def test_integration():
         logger.info("📝 Test 3: Gestionnaire de fichiers...")
         start_time = time.time()
         
-        file_result = await engine.modules['file_manager'].execute('list_directory', {
+        file_result = await engine.modules['file_manager'].execute('list', {
             'path': str(Path(__file__).parent.parent)
         })
         
@@ -91,12 +91,24 @@ async def test_integration():
         logger.info("📝 Test 4: Mémoire...")
         start_time = time.time()
         
-        memory_result = await engine.memory.store_conversation(
-            user_id="test_user",
-            session_id="test_session",
-            message="Test d'intégration",
-            response="Test réussi"
+        from core.interfaces import Message
+        
+        test_message = Message(
+            content="Test d'intégration",
+            role="user",
+            timestamp=None,
+            metadata={"test": True}
         )
+        
+        await engine.memory.add_message(
+            session_id="test_session",
+            message=test_message,
+            intent="test",
+            response="Test réussi",
+            metadata={"test": True}
+        )
+        
+        memory_result = True
         
         memory_time = time.time() - start_time
         
@@ -110,9 +122,29 @@ async def test_integration():
         logger.info("📝 Test 5: Contexte...")
         start_time = time.time()
         
-        context_result = await engine.context_manager.add_message(
-            "user", "Test de contexte", "test_session"
+        from core.interfaces import Message
+        
+        user_message = Message(
+            content="Test de contexte",
+            role="user",
+            timestamp=None,
+            metadata={"test": True}
         )
+        
+        assistant_response = Message(
+            content="Contexte testé avec succès",
+            role="assistant",
+            timestamp=None,
+            metadata={"test": True}
+        )
+        
+        await engine.context_manager.update_context(
+            user_id="test_user",
+            message=user_message,
+            response=assistant_response
+        )
+        
+        context_result = True
         
         context_time = time.time() - start_time
         
@@ -126,7 +158,7 @@ async def test_integration():
         logger.info("📝 Test 6: Classification d'intention...")
         start_time = time.time()
         
-        intent_result = await engine.intent_classifier.classify_intent(
+        intent_result = await engine.intent_classifier.classify(
             "Recherche des dernières actualités sur l'IA"
         )
         
@@ -151,7 +183,7 @@ async def test_integration():
         
         if llm_result:
             logger.info(f"✅ Modèle de langage réussi en {llm_time:.3f}s")
-            logger.info(f"📊 Réponse: {llm_result.text[:100]}...")
+            logger.info(f"📊 Réponse: {llm_result[:100]}...")
         else:
             logger.error("❌ Modèle de langage échoué")
         

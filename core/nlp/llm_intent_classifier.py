@@ -120,8 +120,8 @@ class LLMIntentClassifier(IIntentClassifier):
                 stop_tokens=['User:', 'Roxane:', '\n\n']
             )
             
-            # Parser la réponse
-            intent_result = self._parse_classification_response(response.text)
+            # Parser la réponse (response est déjà une string)
+            intent_result = self._parse_classification_response(response)
             
             return Intent(
                 name=intent_result['intent'],
@@ -157,52 +157,56 @@ class LLMIntentClassifier(IIntentClassifier):
                 role = "User" if msg.role == "user" else "Roxane"
                 context_str += f"{role}: {msg.content}\n"
         
-        prompt = f"""Tu es un classificateur d'intentions expert. Analyse le message utilisateur et détermine son intention.
+        prompt = f"""Classifie cette intention: "{message}"
 
-Intentions possibles:
-{intents_desc}
+Intentions: {intents_desc}
 
-{context_str}
-
-Message à classifier: "{message}"
-
-Réponds UNIQUEMENT avec un JSON valide dans ce format:
-{{
-    "intent": "nom_de_l_intention",
-    "confidence": 0.95,
-    "entities": {{
-        "query": "terme de recherche si applicable",
-        "command": "commande système si applicable",
-        "path": "chemin fichier si applicable",
-        "operation": "opération fichier si applicable"
-    }},
-    "reasoning": "explication courte de la classification"
-}}
-
-Réponse:"""
+JSON:"""
         
         return prompt
     
     def _parse_classification_response(self, response: str) -> Dict[str, Any]:
         """Parse la réponse de classification du LLM"""
         try:
-            # Extraire le JSON de la réponse
-            json_match = re.search(r'\{.*\}', response, re.DOTALL)
-            if not json_match:
+            logger.debug(f"Raw LLM response: {response}")
+            
+            # Nettoyer la réponse
+            response = response.strip()
+            
+            # Essayer plusieurs patterns pour extraire le JSON
+            json_patterns = [
+                r'\{[^{}]*"intent"[^{}]*\}',  # JSON simple sur une ligne
+                r'\{.*?"intent".*?\}',        # JSON avec "intent"
+                r'\{.*\}',                    # Tout JSON
+            ]
+            
+            json_str = None
+            for pattern in json_patterns:
+                json_match = re.search(pattern, response, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group(0)
+                    break
+            
+            if not json_str:
                 raise ValueError("No JSON found in response")
             
-            json_str = json_match.group(0)
+            logger.debug(f"Extracted JSON: {json_str}")
+            
+            # Parser le JSON
             result = json.loads(json_str)
             
             # Valider et normaliser
             intent_name = result.get('intent', 'unknown')
             if intent_name not in self.SUPPORTED_INTENTS:
+                logger.warning(f"Unknown intent: {intent_name}, falling back to unknown")
                 intent_name = 'unknown'
             
             confidence = float(result.get('confidence', 0.5))
             confidence = max(0.0, min(1.0, confidence))  # Clamp entre 0 et 1
             
             entities = result.get('entities', {})
+            
+            logger.info(f"Successfully parsed intent: {intent_name} (confidence: {confidence})")
             
             return {
                 'intent': intent_name,
@@ -213,6 +217,7 @@ Réponse:"""
             
         except Exception as e:
             logger.warning(f"Failed to parse classification response: {e}")
+            logger.debug(f"Response was: {response}")
             return {
                 'intent': 'unknown',
                 'confidence': 0.1,
@@ -224,22 +229,30 @@ Réponse:"""
         """Classification de fallback basée sur des mots-clés"""
         message_lower = message.lower()
         
+        logger.info(f"Using fallback classification for: {message}")
+        
         # Patterns simples pour le fallback
         if any(word in message_lower for word in ['bonjour', 'salut', 'hello', 'hey']):
+            logger.info("Fallback: detected greeting")
             return Intent('greeting', 0.7, {})
         
-        if any(word in message_lower for word in ['recherche', 'cherche', 'trouve', 'google']):
-            return Intent('web_search', 0.6, {'query': message})
+        if any(word in message_lower for word in ['recherche', 'cherche', 'trouve', 'google', 'actualités', 'informations']):
+            logger.info("Fallback: detected web_search")
+            return Intent('web_search', 0.8, {'query': message})
         
         if any(word in message_lower for word in ['ouvre', 'ferme', 'lance', 'démarre']):
+            logger.info("Fallback: detected system_command")
             return Intent('system_command', 0.6, {'command': message})
         
         if any(word in message_lower for word in ['fichier', 'dossier', 'crée', 'supprime']):
+            logger.info("Fallback: detected file_operation")
             return Intent('file_operation', 0.6, {'operation': 'unknown'})
         
         if message_lower.endswith('?'):
+            logger.info("Fallback: detected question")
             return Intent('question', 0.5, {})
         
+        logger.info("Fallback: no pattern matched, returning unknown")
         return Intent('unknown', 0.3, {})
     
     def get_supported_intents(self) -> List[str]:

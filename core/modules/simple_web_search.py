@@ -14,7 +14,7 @@ from loguru import logger
 from bs4 import BeautifulSoup
 import json
 import hashlib
-from urllib.parse import urljoin, urlparse, quote_plus
+from urllib.parse import urljoin, urlparse, quote_plus, unquote, parse_qs
 import re
 
 from core.interfaces import IModule, ActionResult
@@ -333,6 +333,9 @@ class SimpleWebSearchModule(IModule):
                     title = title_element.get_text(strip=True)
                     url = title_element.get('href', '')
                     
+                    # Décoder l'URL DuckDuckGo si nécessaire
+                    decoded_url = self._decode_duckduckgo_url(url)
+                    
                     # Extraire le snippet
                     snippet_element = element.find('a', class_='result__snippet')
                     snippet = snippet_element.get_text(strip=True) if snippet_element else ''
@@ -342,11 +345,11 @@ class SimpleWebSearchModule(IModule):
                     
                     results.append(SearchResult(
                         title=title,
-                        url=url,
+                        url=decoded_url,
                         snippet=snippet,
                         relevance_score=relevance_score,
                         source='duckduckgo',
-                        metadata={'position': i + 1}
+                        metadata={'position': i + 1, 'original_url': url}
                     ))
                     
                 except Exception as e:
@@ -506,6 +509,26 @@ class SimpleWebSearchModule(IModule):
         score = 0.5 + (title_matches * 0.3 + snippet_matches * 0.2) / len(query_words)
         return min(score, 1.0)
     
+    def _decode_duckduckgo_url(self, url: str) -> str:
+        """Décode les URLs de redirection DuckDuckGo"""
+        if not url.startswith('//duckduckgo.com/l/'):
+            return url
+        
+        try:
+            # Parser l'URL pour extraire les paramètres
+            parsed = urlparse(f"https:{url}")
+            query_params = parse_qs(parsed.query)
+            
+            # Extraire l'URL cible depuis le paramètre 'uddg'
+            if 'uddg' in query_params:
+                target_url = unquote(query_params['uddg'][0])
+                return target_url
+            
+            return url
+        except Exception as e:
+            logger.warning(f"Failed to decode DuckDuckGo URL {url}: {e}")
+            return url
+    
     async def _extract_content_simple(self, parameters: Dict[str, Any]) -> ActionResult:
         """Extraction de contenu simple"""
         url = parameters.get('url', '')
@@ -531,7 +554,20 @@ class SimpleWebSearchModule(IModule):
             if not self.session:
                 raise Exception("Session not initialized")
             
-            async with self.session.get(url) as response:
+            # S'assurer que l'URL est valide
+            if not url.startswith(('http://', 'https://')):
+                raise Exception(f"Invalid URL format: {url}")
+            
+            # Ajouter des headers pour éviter les blocages
+            headers = {
+                'User-Agent': random.choice(self.user_agents),
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate',
+                'Connection': 'keep-alive',
+            }
+            
+            async with self.session.get(url, headers=headers) as response:
                 if response.status != 200:
                     raise Exception(f"HTTP {response.status}")
                 

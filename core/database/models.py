@@ -70,6 +70,7 @@ class Conversation(Base):
     message_count = Column(Integer, default=0, nullable=False)
     summary = Column(Text, nullable=True)
     meta_data = Column(JSON, default=dict)
+    is_active = Column(Boolean, default=True, nullable=False)
     
     # Relations
     session = relationship("Session", back_populates="conversations")

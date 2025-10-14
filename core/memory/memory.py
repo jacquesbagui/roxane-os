@@ -404,6 +404,8 @@ class MemoryManager:
                 ).order_by(Conversation.created_at.desc()).first()
                 
                 if recent_conversation:
+                    # Détacher l'objet de la session pour éviter les problèmes de binding
+                    session.expunge(recent_conversation)
                     return recent_conversation
                 
                 # Créer une nouvelle conversation
@@ -415,6 +417,8 @@ class MemoryManager:
                 session.add(conversation)
                 session.commit()
                 session.refresh(conversation)
+                # Détacher l'objet de la session
+                session.expunge(conversation)
                 return conversation
                 
         except Exception as e:

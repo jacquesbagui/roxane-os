@@ -115,12 +115,14 @@ class FileManagerModule(IModule):
             else:
                 return ActionResult(
                     success=False,
+                    data={},
                     error=f"Unknown action type: {action_type}"
                 )
         except Exception as e:
             logger.error(f"File manager action failed: {e}")
             return ActionResult(
                 success=False,
+                data={},
                 error=str(e)
             )
     
@@ -134,6 +136,7 @@ class FileManagerModule(IModule):
         if not self._is_path_allowed(path):
             return ActionResult(
                 success=False,
+                data={},
                 error="Access to this path is restricted"
             )
         
@@ -204,6 +207,7 @@ class FileManagerModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to list files: {e}"
             )
     
@@ -216,18 +220,21 @@ class FileManagerModule(IModule):
         if not path:
             return ActionResult(
                 success=False,
+                data={},
                 error="Path is required"
             )
         
         if not self._is_path_allowed(path):
             return ActionResult(
                 success=False,
+                data={},
                 error="Access to this path is restricted"
             )
         
         if not self._is_extension_allowed(path):
             return ActionResult(
                 success=False,
+                data={},
                 error="File extension not allowed"
             )
         
@@ -256,6 +263,7 @@ class FileManagerModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to read file: {e}"
             )
     
@@ -270,18 +278,21 @@ class FileManagerModule(IModule):
         if not path:
             return ActionResult(
                 success=False,
+                data={},
                 error="Path is required"
             )
         
         if not self._is_path_allowed(path):
             return ActionResult(
                 success=False,
+                data={},
                 error="Access to this path is restricted"
             )
         
         if not self._is_extension_allowed(path):
             return ActionResult(
                 success=False,
+                data={},
                 error="File extension not allowed"
             )
         
@@ -307,6 +318,7 @@ class FileManagerModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to write file: {e}"
             )
     
@@ -318,12 +330,14 @@ class FileManagerModule(IModule):
         if not source or not destination:
             return ActionResult(
                 success=False,
+                data={},
                 error="Source and destination are required"
             )
         
         if not self._is_path_allowed(source) or not self._is_path_allowed(destination):
             return ActionResult(
                 success=False,
+                data={},
                 error="Access to one of the paths is restricted"
             )
         
@@ -344,6 +358,7 @@ class FileManagerModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to copy: {e}"
             )
     
@@ -355,12 +370,14 @@ class FileManagerModule(IModule):
         if not source or not destination:
             return ActionResult(
                 success=False,
+                data={},
                 error="Source and destination are required"
             )
         
         if not self._is_path_allowed(source) or not self._is_path_allowed(destination):
             return ActionResult(
                 success=False,
+                data={},
                 error="Access to one of the paths is restricted"
             )
         
@@ -378,6 +395,7 @@ class FileManagerModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to move: {e}"
             )
     
@@ -389,12 +407,14 @@ class FileManagerModule(IModule):
         if not path:
             return ActionResult(
                 success=False,
+                data={},
                 error="Path is required"
             )
         
         if not self._is_path_allowed(path):
             return ActionResult(
                 success=False,
+                data={},
                 error="Access to this path is restricted"
             )
         
@@ -418,6 +438,7 @@ class FileManagerModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to delete: {e}"
             )
     
@@ -431,12 +452,14 @@ class FileManagerModule(IModule):
         if not query and not pattern:
             return ActionResult(
                 success=False,
+                data={},
                 error="Query or pattern is required"
             )
         
         if not self._is_path_allowed(path):
             return ActionResult(
                 success=False,
+                data={},
                 error="Access to this path is restricted"
             )
         
@@ -484,6 +507,7 @@ class FileManagerModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to search files: {e}"
             )
     
@@ -495,12 +519,14 @@ class FileManagerModule(IModule):
         if not path:
             return ActionResult(
                 success=False,
+                data={},
                 error="Path is required"
             )
         
         if not self._is_path_allowed(path):
             return ActionResult(
                 success=False,
+                data={},
                 error="Access to this path is restricted"
             )
         
@@ -543,6 +569,7 @@ class FileManagerModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to get file info: {e}"
             )
     
@@ -554,12 +581,14 @@ class FileManagerModule(IModule):
         if not path:
             return ActionResult(
                 success=False,
+                data={},
                 error="Path is required"
             )
         
         if not self._is_path_allowed(path):
             return ActionResult(
                 success=False,
+                data={},
                 error="Access to this path is restricted"
             )
         
@@ -577,6 +606,7 @@ class FileManagerModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to create directory: {e}"
             )
     

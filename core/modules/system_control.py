@@ -93,12 +93,14 @@ class SystemControlModule(IModule):
             else:
                 return ActionResult(
                     success=False,
+                    data={},
                     error=f"Unknown action type: {action_type}"
                 )
         except Exception as e:
             logger.error(f"System control action failed: {e}")
             return ActionResult(
                 success=False,
+                data={},
                 error=str(e)
             )
     
@@ -134,6 +136,7 @@ class SystemControlModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to get system info: {e}"
             )
     
@@ -170,11 +173,13 @@ class SystemControlModule(IModule):
             else:
                 return ActionResult(
                     success=False,
+                    data={},
                     error=f"Unknown process action: {action}"
                 )
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Process management failed: {e}"
             )
     
@@ -213,6 +218,7 @@ class SystemControlModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to list processes: {e}"
             )
     
@@ -223,6 +229,7 @@ class SystemControlModule(IModule):
         if not pid:
             return ActionResult(
                 success=False,
+                data={},
                 error="PID is required"
             )
         
@@ -243,11 +250,13 @@ class SystemControlModule(IModule):
         except psutil.NoSuchProcess:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Process {pid} not found"
             )
         except psutil.AccessDenied:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Access denied for process {pid}"
             )
     
@@ -258,6 +267,7 @@ class SystemControlModule(IModule):
         if not command:
             return ActionResult(
                 success=False,
+                data={},
                 error="Command is required"
             )
         
@@ -265,6 +275,7 @@ class SystemControlModule(IModule):
         if self.allowed_commands and command.split()[0] not in self.allowed_commands:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Command '{command}' not allowed"
             )
         
@@ -288,6 +299,7 @@ class SystemControlModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to start process: {e}"
             )
     
@@ -310,6 +322,7 @@ class SystemControlModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"File management failed: {e}"
             )
     
@@ -347,6 +360,7 @@ class SystemControlModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to list files: {e}"
             )
     
@@ -358,6 +372,7 @@ class SystemControlModule(IModule):
         if not path:
             return ActionResult(
                 success=False,
+                data={},
                 error="Path is required"
             )
         
@@ -385,6 +400,7 @@ class SystemControlModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to read file: {e}"
             )
     
@@ -397,6 +413,7 @@ class SystemControlModule(IModule):
         if not path:
             return ActionResult(
                 success=False,
+                data={},
                 error="Path is required"
             )
         
@@ -414,6 +431,7 @@ class SystemControlModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to write file: {e}"
             )
     
@@ -434,6 +452,7 @@ class SystemControlModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Network management failed: {e}"
             )
     
@@ -470,6 +489,7 @@ class SystemControlModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to get network info: {e}"
             )
     
@@ -501,6 +521,7 @@ class SystemControlModule(IModule):
         except Exception as e:
             return ActionResult(
                 success=False,
+                data={},
                 error=f"Failed to list connections: {e}"
             )
     

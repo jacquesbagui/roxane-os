@@ -262,7 +262,7 @@ class ContextManager(IContextManager):
                     content=msg.content,
                     role=msg.role,
                     timestamp=msg.timestamp,
-                    metadata=msg.metadata or {}
+                    metadata=msg.meta_data or {}
                 ))
             
             return ConversationContext(
@@ -300,6 +300,7 @@ class ContextManager(IContextManager):
                 ).order_by(Conversation.created_at.desc()).first()
                 
                 if recent_conversation:
+                    session.expunge(recent_conversation)
                     return recent_conversation
                 
                 # Créer une nouvelle conversation
@@ -311,16 +312,18 @@ class ContextManager(IContextManager):
                 session.add(conversation)
                 session.commit()
                 session.refresh(conversation)
+                session.expunge(conversation)
                 return conversation
                 
         except Exception as e:
             logger.warning(f"Failed to get/create conversation: {e}")
-            # Fallback: créer une conversation simple
+            # Fallback: conversation simple
             async with self.db_manager.get_session() as session:
                 conversation = Conversation(session_id=session_id)
                 session.add(conversation)
                 session.commit()
                 session.refresh(conversation)
+                session.expunge(conversation)
                 return conversation
     
     async def _save_to_db_async(
