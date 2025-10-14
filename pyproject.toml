@@ -1,0 +1,101 @@
+[tool.poetry]
+name = "roxane-os"
+version = "1.0.0"
+description = "AI-Powered Personal Assistant Operating System"
+authors = ["Your Name <your.email@example.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/jacquesbagui/roxane-os"
+keywords = ["ai", "assistant", "llm", "voice", "automation"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+
+# Core
+fastapi = "^0.109.0"
+uvicorn = {extras = ["standard"], version = "^0.27.0"}
+websockets = "^12.0"
+python-multipart = "^0.0.6"
+
+# Database
+psycopg = {extras = ["binary", "pool"], version = "^3.1.18"}
+psycopg2-binary = "^2.9.9"
+redis = "^5.0.1"
+sqlalchemy = "^2.0.25"
+alembic = "^1.13.1"
+
+# AI/ML
+torch = "^2.1.0"
+transformers = "^4.36.0"
+sentence-transformers = "^2.3.1"
+accelerate = "^0.25.0"
+bitsandbytes = "^0.41.3"
+peft = "^0.7.0"
+
+# Audio
+sounddevice = "^0.4.6"
+soundfile = "^0.12.1"
+librosa = "^0.10.1"
+pyaudio = "^0.2.14"
+faster-whisper = "^0.10.0"
+TTS = "^0.22.0"
+
+# GUI
+PyQt6 = "^6.6.1"
+PyQt6-WebEngine = "^6.6.0"
+
+# Web
+playwright = "^1.41.0"
+beautifulsoup4 = "^4.12.3"
+lxml = "^5.1.0"
+requests = "^2.31.0"
+aiohttp = "^3.9.1"
+
+# Utils
+python-dotenv = "^1.0.0"
+pydantic = "^2.5.3"
+pydantic-settings = "^2.1.0"
+loguru = "^0.7.2"
+rich = "^13.7.0"
+typer = "^0.9.0"
+pyyaml = "^6.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+pytest-asyncio = "^0.21.1"
+pytest-qt = "^4.3.1"
+pytest-cov = "^4.1.0"
+black = "^23.12.1"
+ruff = "^0.1.11"
+mypy = "^1.8.0"
+pre-commit = "^3.6.0"
+
+[tool.poetry.scripts]
+roxane = "api.server:main"
+roxane-gui = "gui.main:main"
+
+[tool.black]
+line-length = 100
+target-version = ['py311']
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

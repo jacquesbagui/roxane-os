@@ -1,0 +1,219 @@
+# Roxane OS - System Configuration
+
+system:
+  version: "1.0.0"
+  environment: "production"  # production | development
+  log_level: "INFO"          # DEBUG | INFO | WARNING | ERROR
+  data_dir: "/opt/roxane/data"
+
+# Modèles IA
+models:
+  llm:
+    name: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+    # Pour production GPU : "meta-llama/Llama-3.1-70B"
+    device: "auto"  # auto | cuda | cpu
+    quantization: "4bit"  # none | 4bit | 8bit
+    max_length: 2048
+    temperature: 0.7
+    top_p: 0.9
+    top_k: 50
+    repetition_penalty: 1.1
+  
+  embeddings:
+    name: "BAAI/bge-large-en-v1.5"
+    dimension: 1024
+    device: "auto"
+  
+  stt:
+    name: "openai/whisper-large-v3"
+    language: "fr"
+    task: "transcribe"
+    device: "auto"
+  
+  tts:
+    name: "tts_models/multilingual/multi-dataset/xtts_v2"
+    language: "fr"
+    speed: 1.0
+    device: "auto"
+
+# Audio
+audio:
+  input_device: "default"
+  output_device: "default"
+  sample_rate: 16000
+  vad_threshold: 0.5
+  vad_model: "snakers4/silero-vad"
+
+# Base de données
+database:
+  postgres:
+    host: "localhost"
+    port: 5432
+    database: "roxane_db"
+    user: "roxane"
+    password: "roxane_secure_pass_2025"
+    pool_size: 10
+  
+  redis:
+    host: "localhost"
+    port: 6379
+    db: 0
+    password: null
+    max_connections: 20
+    default_ttl: 3600  # 1 heure
+    context_ttl: 1800   # 30 minutes
+    session_ttl: 7200   # 2 heures
+
+
+# Contexte optimisé
+context:
+  max_history: 20             # Nombre de messages gardés en contexte
+  cache_ttl: 1800             # TTL du cache en secondes (30 min)
+  compression: true           # Compression des données
+  batch_size: 10              # Taille des lots pour les opérations
+  redis_enabled: true         # Utiliser Redis pour le cache
+  local_cache_enabled: true   # Utiliser le cache local
+
+# Recherche web robuste
+web_search:
+  search:
+    max_results: 10           # Nombre maximum de résultats
+    timeout: 30               # Timeout en secondes
+    retry_attempts: 3         # Nombre de tentatives
+    cache_ttl: 3600           # TTL du cache (1 heure)
+    respect_robots_txt: true  # Respecter robots.txt
+    user_agent_rotation: true # Rotation des User-Agents
+    proxy_enabled: false      # Utiliser des proxies
+    proxy_list: []            # Liste des proxies
+  engines:
+    searxng:
+      enabled: true
+      url: "http://localhost:8080/search"
+      weight: 1.0
+    duckduckgo:
+      enabled: true
+      url: "https://api.duckduckgo.com/"
+      weight: 0.8
+    bing:
+      enabled: false
+      url: "https://api.bing.microsoft.com/v7.0/search"
+      api_key: ""
+      weight: 0.6
+    google:
+      enabled: false
+      url: "https://www.googleapis.com/customsearch/v1"
+      api_key: ""
+      search_engine_id: ""
+      weight: 0.4
+
+# Mémoire
+memory:
+  short_term_limit: 20        # Nombre de tours gardés en mémoire
+  vector_search_limit: 10     # Nombre de résultats similaires
+  session_timeout: 3600       # Timeout session (secondes)
+  enable_learning: true       # Activer le fine-tuning automatique
+
+# Permissions et sécurité
+permissions:
+  level: 2                    # 0=lecture, 1=écriture user, 2=système, 3=packages, 4=sudo
+  require_confirmation: true  # Demander confirmation pour actions critiques
+  
+  blacklist_commands:
+    - "rm -rf /"
+    - "dd if=/dev/zero"
+    - "mkfs.*"
+    - ":(){ :|:& };:"
+  
+  allowed_directories:
+    - "/home/roxane"
+    - "/opt/roxane"
+    - "/tmp"
+
+# Modules
+modules:
+  web_search:
+    enabled: true
+    engine: "searxng"      # searxng | brave
+    searxng_url: "http://localhost:8888"
+    max_results: 5
+    timeout: 10
+  
+  web_navigation:
+    enabled: true
+    browser: "chromium"
+    headless: true
+    timeout: 30
+  
+  system_control:
+    enabled: true
+    allowed_commands:
+      - "ls"
+      - "cat"
+      - "grep"
+      - "find"
+      - "ps"
+      - "top"
+      - "nvidia-smi"
+  
+  code_execution:
+    enabled: true
+    sandbox: "docker"
+    max_execution_time: 300  # 5 minutes
+    memory_limit: "4g"
+    cpu_limit: "2.0"
+
+# API
+api:
+  host: "0.0.0.0"
+  port: 8000
+  cors_enabled: true
+  rate_limit: 100  # requêtes par minute
+  websocket_enabled: true
+
+# GUI
+gui:
+  theme: "dark"              # dark | light
+  font_family: "Inter"
+  font_size: 12
+  code_font_family: "Fira Code"
+  code_font_size: 11
+  window_width: 1400
+  window_height: 900
+  enable_animations: true
+
+# Learning (Fine-tuning)
+learning:
+  enabled: true
+  schedule: "weekly"         # daily | weekly | monthly
+  min_examples: 100
+  lora_rank: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+  training_epochs: 3
+  batch_size: 4
+  learning_rate: 0.0002
+
+# Logging
+logging:
+  file: "/var/log/roxane/roxane.log"
+  rotation: "100 MB"
+  retention: "30 days"
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}"
+  
+  levels:
+    core: "INFO"
+    api: "INFO"
+    gui: "INFO"
+    modules: "INFO"
+
+# Backup
+backup:
+  enabled: true
+  schedule: "daily"
+  retention: 7  # Nombre de backups à garder
+  directory: "/opt/roxane/backups"
+  include:
+    - "database"
+    - "lora"
+    - "config"
+    - "logs"
