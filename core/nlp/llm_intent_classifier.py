@@ -175,17 +175,35 @@ JSON:"""
             
             # Essayer plusieurs patterns pour extraire le JSON
             json_patterns = [
-                r'\{[^{}]*"intent"[^{}]*\}',  # JSON simple sur une ligne
-                r'\{.*?"intent".*?\}',        # JSON avec "intent"
-                r'\{.*\}',                    # Tout JSON
+                r'```json\s*(\{.*?\})\s*```',  # JSON dans des blocs de code
+                r'\{[^{}]*"intent"[^{}]*\}',   # JSON simple sur une ligne
+                r'\{.*?"intent".*?\}',         # JSON avec "intent"
             ]
             
             json_str = None
             for pattern in json_patterns:
                 json_match = re.search(pattern, response, re.DOTALL)
                 if json_match:
-                    json_str = json_match.group(0)
+                    json_str = json_match.group(1) if len(json_match.groups()) > 0 else json_match.group(0)
                     break
+            
+            # Si aucun pattern ne fonctionne, essayer de trouver le premier JSON valide
+            if not json_str:
+                # Chercher le premier { et essayer de trouver la fermeture correspondante
+                start_idx = response.find('{')
+                if start_idx != -1:
+                    brace_count = 0
+                    end_idx = start_idx
+                    for i, char in enumerate(response[start_idx:], start_idx):
+                        if char == '{':
+                            brace_count += 1
+                        elif char == '}':
+                            brace_count -= 1
+                            if brace_count == 0:
+                                end_idx = i
+                                break
+                    if brace_count == 0:
+                        json_str = response[start_idx:end_idx+1]
             
             if not json_str:
                 raise ValueError("No JSON found in response")
